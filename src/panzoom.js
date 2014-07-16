@@ -502,7 +502,7 @@
 			if (typeof matrix === 'string') {
 				matrix = this.getMatrix(matrix);
 			}
-			var dims, container, marginW, marginH, diffW, diffH, left, top, width, height;
+			var dims, container, marginW, marginH, diffW, diffH, left, top, width, height, absoluteTop, absoluteLeft, maxWidthPosition, maxHeightPosition;
 			var scale = +matrix[0];
 			var $parent = this.$parent;
 			var contain = typeof options.contain !== 'undefined' ? options.contain : this.options.contain;
@@ -525,6 +525,33 @@
 					marginH += (container.height - height) / 2;
 					matrix[4] = Math.max(Math.min(matrix[4], marginW - left), -marginW - left - diffW);
 					matrix[5] = Math.max(Math.min(matrix[5], marginH - top), -marginH - top - diffH + dims.heightBorder);
+				} else if (contain === 'absolute') {
+
+					// Absolute centered, ignore margins
+					absoluteTop = dims.top;
+					absoluteLeft = dims.left;
+					diffW = width > container.width ? width - container.width : 0;
+					diffH = height > container.height ? height - container.height : 0;
+					marginW += (container.width - width) / 2;
+					marginH += (container.height - height) / 2;
+					maxWidthPosition = Math.abs((container.width - width * scale) / 2);
+					maxHeightPosition = Math.abs((container.height - height * scale) / 2);
+
+					matrix[4] = Math.max(Math.min(matrix[4], marginW - left), -marginW - left - diffW);
+					matrix[5] = Math.max(Math.min(matrix[5], marginH - top), -marginH - top - diffH + dims.heightBorder);
+
+					if (container.width > (width * scale)) {
+						matrix[4] = 0;
+					} else if (Math.abs(matrix[4]) > maxWidthPosition) {
+						matrix[4] = matrix[4] >= 0 ? maxWidthPosition : -maxWidthPosition;
+					}
+
+					if (container.height > (height * scale)) {
+						matrix[5] = 0;
+					} else if (Math.abs(matrix[5]) > maxHeightPosition) {
+						matrix[5] = matrix[5] >= 0 ? maxHeightPosition : -maxHeightPosition;
+					}
+
 				} else {
 					// marginW += dims.widthBorder / 2;
 					marginH += dims.heightBorder / 2;
